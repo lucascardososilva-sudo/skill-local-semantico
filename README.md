@@ -39,11 +39,13 @@ SKILLS_DIR=/path/to/skills skilljack-mcp
 skilljack-mcp --static /path/to/skills
 ```
 
-## Configuration UI
+## Configuration and Skills Display UI
+
+This server comes along with a [MCP Apps](https://blog.modelcontextprotocol.io/posts/2026-01-26-mcp-apps/)-based UI for clients that support it.  Instead of fiddling with configs or environment variables, you can just configure your skills locations and skill visiblity directly in your chat window.
+
+(Screenshots below are from Claude Desktop in dark mode.)
 
 ![Skills Configuration UI](docs/images/skills-config-ui.png)
-
-## Skill Display UI
 
 ![Skill Display UI](docs/images/skill-display-ui.png)
 
