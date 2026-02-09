@@ -140,6 +140,13 @@ function renderStats() {
   if (validCount < directories.length) {
     stats.textContent += ` (${directories.length - validCount} missing)`;
   }
+
+  const warningBanner = document.getElementById("skill-count-warning")!;
+  if (totalSkills >= 50) {
+    warningBanner.style.display = "block";
+  } else {
+    warningBanner.style.display = "none";
+  }
 }
 
 function renderOverrideBanner() {
