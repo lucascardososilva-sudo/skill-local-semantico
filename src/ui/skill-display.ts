@@ -98,6 +98,13 @@ function renderStats() {
   } else {
     stats.textContent = `${skills.length} skill${skills.length !== 1 ? "s" : ""} available`;
   }
+
+  const warningBanner = document.getElementById("skill-count-warning")!;
+  if (skills.length >= 50) {
+    warningBanner.style.display = "block";
+  } else {
+    warningBanner.style.display = "none";
+  }
 }
 
 function renderSkills() {

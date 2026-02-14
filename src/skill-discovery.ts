@@ -330,3 +330,15 @@ export function getModelInvocableSkills(skills: SkillMetadata[]): SkillMetadata[
 export function getUserInvocableSkills(skills: SkillMetadata[]): SkillMetadata[] {
   return skills.filter((skill) => skill.effectiveUserInvocable);
 }
+
+export const SKILL_COUNT_WARNING_THRESHOLD = 50;
+
+export function warnLargeSkillCount(skillCount: number): void {
+  if (skillCount >= SKILL_COUNT_WARNING_THRESHOLD) {
+    console.error(
+      `Warning: ${skillCount} skills discovered. Large skill counts can degrade LLM performance ` +
+      `by bloating tool descriptions. Consider reducing the number of skill directories or ` +
+      `setting 'disable-model-invocation: true' in SKILL.md frontmatter for user-only skills.`
+    );
+  }
+}

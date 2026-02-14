@@ -26,7 +26,7 @@ import chokidar from "chokidar";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { discoverSkills, createSkillMap, applyInvocationOverrides, SkillSource, DEFAULT_SKILL_SOURCE, BUNDLED_SKILL_SOURCE } from "./skill-discovery.js";
+import { discoverSkills, createSkillMap, applyInvocationOverrides, SkillSource, DEFAULT_SKILL_SOURCE, BUNDLED_SKILL_SOURCE, warnLargeSkillCount } from "./skill-discovery.js";
 import { registerSkillTool, getToolDescription, SkillState } from "./skill-tool.js";
 import { registerSkillResources } from "./skill-resources.js";
 import { registerSkillPrompts, refreshPrompts, PromptRegistry } from "./skill-prompts.js";
@@ -316,6 +316,7 @@ function refreshSkills(
   skillState.skillMap = createSkillMap(skills);
 
   console.error(`Skills refreshed: ${oldCount} -> ${skills.length} skill(s)`);
+  warnLargeSkillCount(skills.length);
 
   // Update the skill tool description with new instructions
   skillTool.update({
@@ -542,6 +543,7 @@ async function main() {
 
   skillState.skillMap = createSkillMap(skills);
   console.error(`Discovered ${skills.length} skill(s)`);
+  warnLargeSkillCount(skills.length);
 
   // Create the MCP server
   // In static mode, disable listChanged for tools/prompts (skills list is frozen)

@@ -82,6 +82,21 @@ h1 {
   color: var(--accent);
 }
 
+/* Warning banner */
+.warning-banner {
+  background: color-mix(in srgb, var(--warning) 15%, var(--bg-secondary));
+  border: 1px solid var(--warning);
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: var(--warning);
+}
+
+.warning-banner strong {
+  color: var(--warning);
+}
+
 /* Search bar */
 .search-bar {
   margin-bottom: 16px;
