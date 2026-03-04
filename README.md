@@ -60,5 +60,6 @@ This loads the [full reference](https://github.com/olaservo/skilljack-mcp/blob/m
 ## Related
 
 - [Agent Skills Specification](https://agentskills.io)
+- [Skills Over MCP Interest Group repository](https://github.com/modelcontextprotocol/experimental-ext-skills)
 - [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [Example MCP Clients](https://modelcontextprotocol.io/clients)
