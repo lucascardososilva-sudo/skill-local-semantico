@@ -8,6 +8,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { parse as parseYaml } from "yaml";
+import type { Annotations } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Source information for a skill.
@@ -407,6 +408,38 @@ export function getModelInvocableSkills(skills: SkillMetadata[]): SkillMetadata[
  */
 export function getUserInvocableSkills(skills: SkillMetadata[]): SkillMetadata[] {
   return skills.filter((skill) => skill.effectiveUserInvocable);
+}
+
+/**
+ * Compute MCP resource annotations for a skill.
+ * Derives audience from effective invocation flags and sets default priority.
+ *
+ * @param skill - The skill metadata
+ * @param priority - Priority hint (0.0 = least important, 1.0 = most important, default 0.5)
+ * @returns Annotations object for use on MCP resources
+ */
+export function getResourceAnnotations(
+  skill: SkillMetadata,
+  priority: number = 0.5
+): Annotations {
+  const clampedPriority = Number.isFinite(priority)
+    ? Math.max(0, Math.min(1, priority))
+    : 0.5;
+  const audience: ("user" | "assistant")[] = [];
+  if (skill.effectiveAssistantInvocable) {
+    audience.push("assistant");
+  }
+  if (skill.effectiveUserInvocable) {
+    audience.push("user");
+  }
+  const annotations: Annotations = { audience, priority: clampedPriority };
+  try {
+    const stat = fs.statSync(skill.path);
+    annotations.lastModified = stat.mtime.toISOString();
+  } catch {
+    // Skip lastModified if file cannot be stat'd
+  }
+  return annotations;
 }
 
 export const SKILL_COUNT_WARNING_THRESHOLD = 50;

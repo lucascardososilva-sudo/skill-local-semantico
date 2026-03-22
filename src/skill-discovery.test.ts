@@ -10,6 +10,7 @@ import {
   generateInstructions,
   warnLargeSkillCount,
   discoverSkills,
+  getResourceAnnotations,
   SKILL_COUNT_WARNING_THRESHOLD,
 } from "./skill-discovery.js";
 import { createTestSkill, createTestSource } from "./__test-helpers__/helpers.js";
@@ -364,5 +365,100 @@ describe("discoverSkills", () => {
     expect(noPrompt).toBeDefined();
     expect(noPrompt!.userInvocable).toBe(false);
     expect(noPrompt!.effectiveUserInvocable).toBe(false);
+  });
+});
+
+describe("getResourceAnnotations", () => {
+  it("returns both audience roles when both flags are true", () => {
+    const skill = createTestSkill({
+      effectiveAssistantInvocable: true,
+      effectiveUserInvocable: true,
+    });
+    const result = getResourceAnnotations(skill);
+    expect(result.audience).toEqual(["assistant", "user"]);
+    expect(result.priority).toBe(0.5);
+  });
+
+  it("returns only assistant when only assistantInvocable is true", () => {
+    const skill = createTestSkill({
+      effectiveAssistantInvocable: true,
+      effectiveUserInvocable: false,
+    });
+    const result = getResourceAnnotations(skill);
+    expect(result.audience).toEqual(["assistant"]);
+  });
+
+  it("returns only user when only userInvocable is true", () => {
+    const skill = createTestSkill({
+      effectiveAssistantInvocable: false,
+      effectiveUserInvocable: true,
+    });
+    const result = getResourceAnnotations(skill);
+    expect(result.audience).toEqual(["user"]);
+  });
+
+  it("returns empty audience when both flags are false", () => {
+    const skill = createTestSkill({
+      effectiveAssistantInvocable: false,
+      effectiveUserInvocable: false,
+    });
+    const result = getResourceAnnotations(skill);
+    expect(result.audience).toEqual([]);
+  });
+
+  it("uses default priority of 0.5", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill);
+    expect(result.priority).toBe(0.5);
+  });
+
+  it("accepts custom priority", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill, 0.8);
+    expect(result.priority).toBe(0.8);
+  });
+
+  it("clamps priority below 0 to 0", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill, -1);
+    expect(result.priority).toBe(0);
+  });
+
+  it("clamps priority above 1 to 1", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill, 5);
+    expect(result.priority).toBe(1);
+  });
+
+  it("falls back to 0.5 for NaN priority", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill, NaN);
+    expect(result.priority).toBe(0.5);
+  });
+
+  it("falls back to 0.5 for Infinity priority", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill, Infinity);
+    expect(result.priority).toBe(0.5);
+  });
+
+  it("falls back to 0.5 for -Infinity priority", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill, -Infinity);
+    expect(result.priority).toBe(0.5);
+  });
+
+  it("includes lastModified for existing file paths", () => {
+    // Use this test file itself as a real path
+    const skill = createTestSkill({ path: __filename });
+    const result = getResourceAnnotations(skill);
+    expect(result.lastModified).toBeDefined();
+    expect(new Date(result.lastModified!).getTime()).not.toBeNaN();
+  });
+
+  it("omits lastModified when file path does not exist", () => {
+    const skill = createTestSkill({ path: "/fake/path/SKILL.md" });
+    const result = getResourceAnnotations(skill);
+    expect(result.lastModified).toBeUndefined();
   });
 });

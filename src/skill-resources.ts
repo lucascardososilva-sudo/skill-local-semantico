@@ -19,7 +19,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { loadSkillContent } from "./skill-discovery.js";
+import type { Resource } from "@modelcontextprotocol/sdk/types.js";
+import { loadSkillContent, getResourceAnnotations } from "./skill-discovery.js";
 import { isPathWithinBase, listSkillFiles, MAX_FILE_SIZE, SkillState } from "./skill-tool.js";
 
 /**
@@ -85,14 +86,15 @@ function registerSkillDirectoryCollection(
     new ResourceTemplate("skill://{skillName}/", {
       list: async () => {
         // Return one entry per skill (the directory collection)
-        const resources: Array<{ uri: string; name: string; mimeType: string; description?: string; _meta?: Record<string, string> }> = [];
+        const resources: Resource[] = [];
 
         for (const [name, skill] of skillState.skillMap) {
-          const resource: (typeof resources)[number] = {
+          const resource: Resource = {
             uri: `skill://${encodeURIComponent(name)}/`,
             name: `${name}/`,
             mimeType: "text/plain",
             description: `All files in ${name} skill directory`,
+            annotations: getResourceAnnotations(skill),
           };
           if (skill.metadata) {
             resource._meta = skill.metadata;
@@ -188,14 +190,15 @@ function registerSkillTemplate(
     new ResourceTemplate("skill://{skillName}", {
       list: async () => {
         // Dynamically return current skills
-        const resources: Array<{ uri: string; name: string; mimeType: string; description?: string; _meta?: Record<string, string> }> = [];
+        const resources: Resource[] = [];
 
         for (const [name, skill] of skillState.skillMap) {
-          const resource: (typeof resources)[number] = {
+          const resource: Resource = {
             uri: `skill://${encodeURIComponent(name)}`,
             name,
             mimeType: "text/markdown",
             description: skill.description,
+            annotations: getResourceAnnotations(skill),
           };
           if (skill.metadata) {
             resource._meta = skill.metadata;
