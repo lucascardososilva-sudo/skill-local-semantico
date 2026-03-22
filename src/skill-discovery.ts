@@ -409,6 +409,28 @@ export function getUserInvocableSkills(skills: SkillMetadata[]): SkillMetadata[]
   return skills.filter((skill) => skill.effectiveUserInvocable);
 }
 
+/**
+ * Compute MCP resource annotations for a skill.
+ * Derives audience from effective invocation flags and sets default priority.
+ *
+ * @param skill - The skill metadata
+ * @param priority - Priority hint (0.0 = least important, 1.0 = most important, default 0.5)
+ * @returns Annotations object for use on MCP resources
+ */
+export function getResourceAnnotations(
+  skill: SkillMetadata,
+  priority: number = 0.5
+): { audience: ("user" | "assistant")[]; priority: number } {
+  const audience: ("user" | "assistant")[] = [];
+  if (skill.effectiveAssistantInvocable) {
+    audience.push("assistant");
+  }
+  if (skill.effectiveUserInvocable) {
+    audience.push("user");
+  }
+  return { audience, priority };
+}
+
 export const SKILL_COUNT_WARNING_THRESHOLD = 50;
 
 export function warnLargeSkillCount(skillCount: number): void {
