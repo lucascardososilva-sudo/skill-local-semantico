@@ -4,7 +4,7 @@ import type { EvalMode } from "./options-builder.js";
 
 export interface EvalConfig {
   expectedSkillName: string;
-  expectedOutput?: string | RegExp;  // What the final output should contain/match
+  expectedOutput?: string | RegExp;  // What the output should contain/match (checked across all messages)
   expectResourceLoad?: boolean;       // Should agent load a skill resource?
 }
 
@@ -73,7 +73,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
       if (!skillToolCalled) {
         textBeforeSkillCall += ' ' + data.text;
       }
-      allOutput += '\n' + data.text;
+      allOutput += (allOutput ? '\n' : '') + data.text;
     }
 
     // Check assistant messages for text content and tool_use
@@ -86,7 +86,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
             if (!skillToolCalled) {
               textBeforeSkillCall += ' ' + c.text;
             }
-            allOutput += '\n' + c.text;
+            allOutput += (allOutput ? '\n' : '') + c.text;
           }
           // Check for tool_use inside assistant message
           if (c.type === 'tool_use' && c.name) {
