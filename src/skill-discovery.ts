@@ -8,6 +8,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { parse as parseYaml } from "yaml";
+import type { Annotations } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Source information for a skill.
@@ -420,8 +421,10 @@ export function getUserInvocableSkills(skills: SkillMetadata[]): SkillMetadata[]
 export function getResourceAnnotations(
   skill: SkillMetadata,
   priority: number = 0.5
-): { audience: ("user" | "assistant")[]; priority: number } {
-  const clampedPriority = Math.max(0, Math.min(1, priority));
+): Annotations {
+  const clampedPriority = Number.isFinite(priority)
+    ? Math.max(0, Math.min(1, priority))
+    : 0.5;
   const audience: ("user" | "assistant")[] = [];
   if (skill.effectiveAssistantInvocable) {
     audience.push("assistant");
