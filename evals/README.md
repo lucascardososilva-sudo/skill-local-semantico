@@ -37,7 +37,7 @@ npm run eval:code-style
 npm run eval:template
 
 # Run with custom model
-npm run eval -- --model=claude-haiku-4-5-20251001
+npm run eval -- --model=claude-haiku-4-5
 ```
 
 ## Modes
