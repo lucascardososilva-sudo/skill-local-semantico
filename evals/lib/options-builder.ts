@@ -99,7 +99,7 @@ async function copyDir(src: string, dest: string): Promise<void> {
 export async function buildOptions(config: BuildOptionsConfig): Promise<any> {
   const { mode, systemPrompt, model, skillsDir } = config;
 
-  // Default to Sonnet 4.5
+  // Default to Sonnet 4.6
   const modelId = model || "claude-sonnet-4-6";
 
   let options: Record<string, unknown>;
