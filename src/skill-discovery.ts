@@ -421,6 +421,7 @@ export function getResourceAnnotations(
   skill: SkillMetadata,
   priority: number = 0.5
 ): { audience: ("user" | "assistant")[]; priority: number } {
+  const clampedPriority = Math.max(0, Math.min(1, priority));
   const audience: ("user" | "assistant")[] = [];
   if (skill.effectiveAssistantInvocable) {
     audience.push("assistant");
@@ -428,7 +429,7 @@ export function getResourceAnnotations(
   if (skill.effectiveUserInvocable) {
     audience.push("user");
   }
-  return { audience, priority };
+  return { audience, priority: clampedPriority };
 }
 
 export const SKILL_COUNT_WARNING_THRESHOLD = 50;

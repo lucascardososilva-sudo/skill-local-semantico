@@ -19,24 +19,9 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { Resource } from "@modelcontextprotocol/sdk/types.js";
 import { loadSkillContent, getResourceAnnotations } from "./skill-discovery.js";
 import { isPathWithinBase, listSkillFiles, MAX_FILE_SIZE, SkillState } from "./skill-tool.js";
-
-/**
- * Resource object returned in list callbacks.
- * Matches the MCP Resource schema with optional annotations and _meta.
- */
-type SkillResource = {
-  uri: string;
-  name: string;
-  mimeType: string;
-  description?: string;
-  annotations?: {
-    audience?: ("user" | "assistant")[];
-    priority?: number;
-  };
-  _meta?: Record<string, string>;
-};
 
 /**
  * Get MIME type based on file extension.
@@ -101,10 +86,10 @@ function registerSkillDirectoryCollection(
     new ResourceTemplate("skill://{skillName}/", {
       list: async () => {
         // Return one entry per skill (the directory collection)
-        const resources: SkillResource[] = [];
+        const resources: Resource[] = [];
 
         for (const [name, skill] of skillState.skillMap) {
-          const resource: SkillResource = {
+          const resource: Resource = {
             uri: `skill://${encodeURIComponent(name)}/`,
             name: `${name}/`,
             mimeType: "text/plain",
@@ -205,10 +190,10 @@ function registerSkillTemplate(
     new ResourceTemplate("skill://{skillName}", {
       list: async () => {
         // Dynamically return current skills
-        const resources: SkillResource[] = [];
+        const resources: Resource[] = [];
 
         for (const [name, skill] of skillState.skillMap) {
-          const resource: SkillResource = {
+          const resource: Resource = {
             uri: `skill://${encodeURIComponent(name)}`,
             name,
             mimeType: "text/markdown",
