@@ -156,7 +156,7 @@ let currentSourceMap: DirectorySourceMap = {};
  * no listChanged notifications for tools/prompts.
  * Priority: CLI flag > env var > config file
  */
-function getStaticMode(): boolean {
+export function getStaticMode(): boolean {
   // Check CLI flag (highest priority)
   const args = process.argv.slice(2);
   if (args.includes("--static")) {
@@ -177,7 +177,7 @@ function getStaticMode(): boolean {
  * Classify paths as local directories or GitHub repositories.
  * GitHub URLs are detected by checking for "github.com" in the path.
  */
-function classifyPaths(paths: string[]): {
+export function classifyPaths(paths: string[]): {
   localDirs: string[];
   githubSpecs: GitHubRepoSpec[];
 } {
@@ -669,7 +669,14 @@ async function main() {
   console.error("Skilljack ready. I know kung fu.");
 }
 
-main().catch((error) => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
+// Only run main() when executed directly (not when imported by tests)
+const isMainModule = process.argv[1] &&
+  (process.argv[1].endsWith("skilljack-mcp") ||
+   process.argv[1] === fileURLToPath(import.meta.url));
+
+if (isMainModule) {
+  main().catch((error) => {
+    console.error("Fatal error:", error);
+    process.exit(1);
+  });
+}
