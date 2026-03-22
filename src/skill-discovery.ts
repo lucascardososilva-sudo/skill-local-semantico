@@ -432,7 +432,14 @@ export function getResourceAnnotations(
   if (skill.effectiveUserInvocable) {
     audience.push("user");
   }
-  return { audience, priority: clampedPriority };
+  const annotations: Annotations = { audience, priority: clampedPriority };
+  try {
+    const stat = fs.statSync(skill.path);
+    annotations.lastModified = stat.mtime.toISOString();
+  } catch {
+    // Skip lastModified if file cannot be stat'd
+  }
+  return annotations;
 }
 
 export const SKILL_COUNT_WARNING_THRESHOLD = 50;

@@ -441,4 +441,24 @@ describe("getResourceAnnotations", () => {
     const result = getResourceAnnotations(skill, Infinity);
     expect(result.priority).toBe(0.5);
   });
+
+  it("falls back to 0.5 for -Infinity priority", () => {
+    const skill = createTestSkill();
+    const result = getResourceAnnotations(skill, -Infinity);
+    expect(result.priority).toBe(0.5);
+  });
+
+  it("includes lastModified for existing file paths", () => {
+    // Use this test file itself as a real path
+    const skill = createTestSkill({ path: __filename });
+    const result = getResourceAnnotations(skill);
+    expect(result.lastModified).toBeDefined();
+    expect(new Date(result.lastModified!).getTime()).not.toBeNaN();
+  });
+
+  it("omits lastModified when file path does not exist", () => {
+    const skill = createTestSkill({ path: "/fake/path/SKILL.md" });
+    const result = getResourceAnnotations(skill);
+    expect(result.lastModified).toBeUndefined();
+  });
 });
