@@ -25,6 +25,15 @@ function isSkillTool(toolName: string, mode: EvalMode): boolean {
 }
 
 /**
+ * Check if a skill name matches the expected name (exact or namespaced)
+ * Namespaced names use the format "prefix__baseName" (e.g., "skills__greeting")
+ */
+function matchesSkillName(actual: string | undefined, expected: string): boolean {
+  if (!actual) return false;
+  return actual === expected || actual.endsWith(`__${expected}`);
+}
+
+/**
  * Check if a tool name is a skill resource tool
  */
 function isSkillResourceTool(toolName: string, mode: EvalMode): boolean {
@@ -115,8 +124,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
   discovered = activated;
 
   // Check if correct skill was activated
-  // Match exact name or namespaced name (e.g., "skills__greeting" matches "greeting")
-  if (activated && skillName !== config.expectedSkillName && !skillName?.endsWith(`__${config.expectedSkillName}`)) {
+  if (activated && !matchesSkillName(skillName, config.expectedSkillName)) {
     activated = false; // Wrong skill
     skillName = undefined;
   }
