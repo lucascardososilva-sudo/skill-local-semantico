@@ -55,7 +55,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
   // Track text before first skill tool call to check for discovery
   let textBeforeSkillCall = '';
   let skillToolCalled = false;
-  let finalOutput = '';
+  let allOutput = ''; // Accumulate all text output for marker detection
 
   for (const entry of entries) {
     // Collect text messages
@@ -64,7 +64,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
       if (!skillToolCalled) {
         textBeforeSkillCall += ' ' + data.text;
       }
-      finalOutput = data.text; // Keep updating to get last text
+      allOutput += '\n' + data.text;
     }
 
     // Check assistant messages for text content and tool_use
@@ -77,7 +77,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
             if (!skillToolCalled) {
               textBeforeSkillCall += ' ' + c.text;
             }
-            finalOutput = c.text;
+            allOutput += '\n' + c.text;
           }
           // Check for tool_use inside assistant message
           if (c.type === 'tool_use' && c.name) {
@@ -115,7 +115,8 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
   discovered = activated;
 
   // Check if correct skill was activated
-  if (activated && skillName !== config.expectedSkillName) {
+  // Match exact name or namespaced name (e.g., "skills__greeting" matches "greeting")
+  if (activated && skillName !== config.expectedSkillName && !skillName?.endsWith(`__${config.expectedSkillName}`)) {
     activated = false; // Wrong skill
     skillName = undefined;
   }
@@ -123,7 +124,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
   // Check if instructions were followed (based on expected output)
   if (config.expectedOutput) {
     if (typeof config.expectedOutput === 'string') {
-      if (finalOutput.toLowerCase().includes(config.expectedOutput.toLowerCase())) {
+      if (allOutput.toLowerCase().includes(config.expectedOutput.toLowerCase())) {
         followed = true;
         followedReason = `Output contains expected text: "${config.expectedOutput}"`;
       } else {
@@ -131,7 +132,7 @@ export function analyzeSession(entries: SessionLogEntry[], config: EvalConfig, m
       }
     } else {
       // RegExp
-      if (config.expectedOutput.test(finalOutput)) {
+      if (config.expectedOutput.test(allOutput)) {
         followed = true;
         followedReason = `Output matches pattern: ${config.expectedOutput}`;
       } else {
