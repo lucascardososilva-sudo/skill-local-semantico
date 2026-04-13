@@ -89,13 +89,17 @@ function registerSkillDirectoryCollection(
         const resources: Resource[] = [];
 
         for (const [name, skill] of skillState.skillMap) {
+          const { annotations, size } = getResourceAnnotations(skill);
           const resource: Resource = {
             uri: `skill://${encodeURIComponent(name)}/`,
             name: `${name}/`,
             mimeType: "text/plain",
             description: `All files in ${name} skill directory`,
-            annotations: getResourceAnnotations(skill),
+            annotations,
           };
+          if (size !== undefined) {
+            resource.size = size;
+          }
           if (skill.metadata) {
             resource._meta = skill.metadata;
           }
@@ -193,13 +197,17 @@ function registerSkillTemplate(
         const resources: Resource[] = [];
 
         for (const [name, skill] of skillState.skillMap) {
+          const { annotations, size } = getResourceAnnotations(skill);
           const resource: Resource = {
             uri: `skill://${encodeURIComponent(name)}`,
             name,
             mimeType: "text/markdown",
             description: skill.description,
-            annotations: getResourceAnnotations(skill),
+            annotations,
           };
+          if (size !== undefined) {
+            resource.size = size;
+          }
           if (skill.metadata) {
             resource._meta = skill.metadata;
           }

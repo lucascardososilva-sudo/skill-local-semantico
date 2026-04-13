@@ -374,9 +374,9 @@ describe("getResourceAnnotations", () => {
       effectiveAssistantInvocable: true,
       effectiveUserInvocable: true,
     });
-    const result = getResourceAnnotations(skill);
-    expect(result.audience).toEqual(["assistant", "user"]);
-    expect(result.priority).toBe(0.5);
+    const { annotations } = getResourceAnnotations(skill);
+    expect(annotations.audience).toEqual(["assistant", "user"]);
+    expect(annotations.priority).toBe(0.5);
   });
 
   it("returns only assistant when only assistantInvocable is true", () => {
@@ -384,8 +384,8 @@ describe("getResourceAnnotations", () => {
       effectiveAssistantInvocable: true,
       effectiveUserInvocable: false,
     });
-    const result = getResourceAnnotations(skill);
-    expect(result.audience).toEqual(["assistant"]);
+    const { annotations } = getResourceAnnotations(skill);
+    expect(annotations.audience).toEqual(["assistant"]);
   });
 
   it("returns only user when only userInvocable is true", () => {
@@ -393,8 +393,8 @@ describe("getResourceAnnotations", () => {
       effectiveAssistantInvocable: false,
       effectiveUserInvocable: true,
     });
-    const result = getResourceAnnotations(skill);
-    expect(result.audience).toEqual(["user"]);
+    const { annotations } = getResourceAnnotations(skill);
+    expect(annotations.audience).toEqual(["user"]);
   });
 
   it("returns empty audience when both flags are false", () => {
@@ -402,63 +402,65 @@ describe("getResourceAnnotations", () => {
       effectiveAssistantInvocable: false,
       effectiveUserInvocable: false,
     });
-    const result = getResourceAnnotations(skill);
-    expect(result.audience).toEqual([]);
+    const { annotations } = getResourceAnnotations(skill);
+    expect(annotations.audience).toEqual([]);
   });
 
   it("uses default priority of 0.5", () => {
     const skill = createTestSkill();
-    const result = getResourceAnnotations(skill);
-    expect(result.priority).toBe(0.5);
+    const { annotations } = getResourceAnnotations(skill);
+    expect(annotations.priority).toBe(0.5);
   });
 
   it("accepts custom priority", () => {
     const skill = createTestSkill();
-    const result = getResourceAnnotations(skill, 0.8);
-    expect(result.priority).toBe(0.8);
+    const { annotations } = getResourceAnnotations(skill, 0.8);
+    expect(annotations.priority).toBe(0.8);
   });
 
   it("clamps priority below 0 to 0", () => {
     const skill = createTestSkill();
-    const result = getResourceAnnotations(skill, -1);
-    expect(result.priority).toBe(0);
+    const { annotations } = getResourceAnnotations(skill, -1);
+    expect(annotations.priority).toBe(0);
   });
 
   it("clamps priority above 1 to 1", () => {
     const skill = createTestSkill();
-    const result = getResourceAnnotations(skill, 5);
-    expect(result.priority).toBe(1);
+    const { annotations } = getResourceAnnotations(skill, 5);
+    expect(annotations.priority).toBe(1);
   });
 
   it("falls back to 0.5 for NaN priority", () => {
     const skill = createTestSkill();
-    const result = getResourceAnnotations(skill, NaN);
-    expect(result.priority).toBe(0.5);
+    const { annotations } = getResourceAnnotations(skill, NaN);
+    expect(annotations.priority).toBe(0.5);
   });
 
   it("falls back to 0.5 for Infinity priority", () => {
     const skill = createTestSkill();
-    const result = getResourceAnnotations(skill, Infinity);
-    expect(result.priority).toBe(0.5);
+    const { annotations } = getResourceAnnotations(skill, Infinity);
+    expect(annotations.priority).toBe(0.5);
   });
 
   it("falls back to 0.5 for -Infinity priority", () => {
     const skill = createTestSkill();
-    const result = getResourceAnnotations(skill, -Infinity);
-    expect(result.priority).toBe(0.5);
+    const { annotations } = getResourceAnnotations(skill, -Infinity);
+    expect(annotations.priority).toBe(0.5);
   });
 
-  it("includes lastModified for existing file paths", () => {
+  it("includes lastModified and size for existing file paths", () => {
     // Use this test file itself as a real path
     const skill = createTestSkill({ path: __filename });
-    const result = getResourceAnnotations(skill);
-    expect(result.lastModified).toBeDefined();
-    expect(new Date(result.lastModified!).getTime()).not.toBeNaN();
+    const { annotations, size } = getResourceAnnotations(skill);
+    expect(annotations.lastModified).toBeDefined();
+    expect(new Date(annotations.lastModified!).getTime()).not.toBeNaN();
+    expect(size).toBeGreaterThan(0);
   });
 
-  it("omits lastModified when file path does not exist", () => {
+  it("omits lastModified and size when file path does not exist", () => {
     const skill = createTestSkill({ path: "/fake/path/SKILL.md" });
-    const result = getResourceAnnotations(skill);
-    expect(result.lastModified).toBeUndefined();
+    const { annotations, size } = getResourceAnnotations(skill);
+    expect(annotations.lastModified).toBeUndefined();
+    expect(size).toBeUndefined();
   });
 });
