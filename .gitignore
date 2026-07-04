@@ -32,3 +32,6 @@ evals/logs/
 evals/results/
 !evals/logs/.gitkeep
 !evals/results/.gitkeep
+
+# Ignore any folder named .inbox at any depth
+.inbox/
