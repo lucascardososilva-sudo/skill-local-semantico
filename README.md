@@ -32,6 +32,17 @@ skilljack-mcp /path/to/skills
 # Multiple directories
 skilljack-mcp /path/to/skills /path/to/more/skills
 
+# GitHub repository (allowlisted via GITHUB_ALLOWED_ORGS / _USERS)
+GITHUB_ALLOWED_ORGS=acme skilljack-mcp github.com/acme/skills
+
+# Well-known publisher (allowlisted via WELL_KNOWN_ALLOWED_ORIGINS).
+# Each entry's SHA-256 digest is verified against the published index.
+# Every fetched URL — the index, each artifact, and any redirect target — must
+# match an allowlisted origin, so if a publisher serves artifacts from a
+# separate CDN origin, add that origin to the list too (comma-separated).
+WELL_KNOWN_ALLOWED_ORIGINS=https://example.com \
+  skilljack-mcp https://example.com/.well-known/agent-skills/
+
 # Using environment variable
 SKILLS_DIR=/path/to/skills skilljack-mcp
 
