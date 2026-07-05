@@ -9,6 +9,8 @@ An MCP server that jacks [Agent Skills](https://agentskills.io) directly into yo
 
 > **Recommended:** For best results, use an MCP client that supports `tools/listChanged` notifications (e.g., Claude Code). This enables dynamic skill discovery - when skills are added or modified, the client automatically refreshes its understanding of available skills. Alternatively, use `--static` mode for predictable behavior with a fixed skill set.
 
+> ⚠️ **Tool search / deferred tools limitation.** Skilljack delivers its skill catalog inside the `load-skill` **tool description**. Clients with **tool search / deferred tool loading** enabled (the default on modern Claude Code, ~2.1.x) do **not** load MCP tool descriptions into the model's context up front — they are discovered on demand — so the model does not see the `<available_skills>` catalog and will **not reliably auto-activate** skilljack skills. To use skilljack's automatic activation today, **disable tool search** (e.g. `ENABLE_TOOL_SEARCH=false`). Making skilljack work with tool search enabled is an open item ([tracking issue](https://github.com/olaservo/skilljack-mcp/issues)).
+
 ## Features
 
 - **Dynamic Skill Discovery** - Watches skill directories and automatically refreshes when skills change
@@ -94,6 +96,16 @@ Use static mode when you need predictable behavior or have a fixed set of skills
 ```bash
 skilljack-mcp "C:/Users/you/skills"
 ```
+
+### HTTP Transport
+
+By default skilljack communicates over **stdio**. To serve over **stateless Streamable HTTP** instead, use `--http` (or `SKILLJACK_HTTP_PORT`):
+
+```bash
+skilljack-mcp --http=3000 /path/to/skills
+```
+
+Clients connect at `POST /mcp`. HTTP mode serves the core skill surface — `load-skill`, `skill-resource`, `skill://` resources, and `/skill` prompts. Because it is stateless (no session, no server→client stream), it does **not** send `listChanged` / `resources/updated` notifications, and the UI config/display tools are stdio-only. Skills are read at startup; restart to pick up on-disk changes. Use stdio when you need dynamic refresh or the configuration UI.
 
 ## Configuration UI
 

@@ -2,6 +2,8 @@
 
 An MCP server that jacks [Agent Skills](https://agentskills.io) directly into your LLM's brain.
 
+> ⚠️ **Heads up — tool search / deferred tools.** Skilljack surfaces its skill catalog through the `load-skill` **tool description**. Clients with **tool search / deferred tool loading** on (the default on modern Claude Code) don't load MCP tool descriptions into context up front, so the model won't reliably auto-activate skilljack skills. Set `ENABLE_TOOL_SEARCH=false` to use automatic activation today. Working with tool search enabled is an open item.
+
 ## Installation
 
 ```bash
@@ -48,7 +50,13 @@ SKILLS_DIR=/path/to/skills skilljack-mcp
 
 # Static mode (no file watching)
 skilljack-mcp --static /path/to/skills
+
+# Serve over HTTP instead of stdio (stateless Streamable HTTP on POST /mcp)
+skilljack-mcp --http=3000 /path/to/skills
+# or: SKILLJACK_HTTP_PORT=3000 skilljack-mcp /path/to/skills
 ```
+
+**Transports:** stdio (default) or stateless HTTP (`--http[=port]`, default `3000`, or `SKILLJACK_HTTP_PORT`). HTTP serves the core skill surface (`load-skill`, `skill-resource`, `skill://` resources, `/skill` prompts) at `POST /mcp`. Because it is stateless, it does not push `listChanged`/`resources/updated` notifications — skills are read at startup; restart to pick up changes. Use stdio for the dynamic-refresh and MCP-Apps UI features.
 
 ## Configuration and Skills Display UI
 
