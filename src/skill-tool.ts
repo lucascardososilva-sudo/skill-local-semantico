@@ -13,7 +13,7 @@ import * as path from "node:path";
 import { McpServer, RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { SkillMetadata, loadSkillContent, generateInstructions, getModelInvocableSkills } from "./skill-discovery.js";
+import { SkillMetadata, loadSkillContent, generateInstructions, getModelInvocableSkills, findMatchingSkills } from "./skill-discovery.js";
 
 /**
  * Shared state for dynamic skill management.
@@ -145,12 +145,19 @@ export function registerSkillTool(
       const skill = skillState.skillMap.get(name);
 
       if (!skill) {
-        const availableSkills = Array.from(skillState.skillMap.keys()).join(", ");
+        const matches = findMatchingSkills(name, skillState.skillMap, 10);
+        let errorText = `Skill "${name}" not found.`;
+        if (matches.length > 0) {
+          errorText += `\n\nDid you mean one of these?\n` +
+            matches.map((m) => `- **${m.name}**: ${m.description}`).join("\n");
+        } else {
+          errorText += " No matching skills found.";
+        }
         return {
           content: [
             {
               type: "text",
-              text: `Skill "${name}" not found. Available skills: ${availableSkills || "none"}`,
+              text: errorText,
             },
           ],
           isError: true,

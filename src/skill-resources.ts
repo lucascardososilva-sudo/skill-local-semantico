@@ -3,9 +3,11 @@
  * (Skills Extension).
  *
  * URI Scheme:
- *   skill://<skill-path>/SKILL.md   -> Each skill's SKILL.md (listed in resources/list)
- *   skill://<skill-path>/<file>     -> Individual files inside a skill (listed in
- *                                      resources/list at lower priority than SKILL.md)
+ *   skill://<skill-path>/SKILL.md   -> Each skill's SKILL.md, registered as an
+ *                                      individual top-level MCP resource so every
+ *                                      skill appears as a peer in the client UI.
+ *   skill://<skill-path>/<file>     -> Individual files inside a skill (readable
+ *                                      via the URI template, not individually listed)
  *   skill://index.json              -> SEP-2640 discovery index (application/json)
  *
  * <skill-path> is computed by getSkillPath(): "<prefix>/<baseName>" for prefixed
@@ -16,7 +18,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { Resource } from "@modelcontextprotocol/sdk/types.js";
 import {
   loadSkillContent,
   getResourceAnnotations,
@@ -53,13 +54,85 @@ function getMimeType(filePath: string): string {
 
 /**
  * Register skill resources with the MCP server.
+ *
+ * Registers the Skill Index and a read-only URI template for on-demand
+ * reads. Individual skills are NOT enumerated via the template's list
+ * callback — instead, call registerIndividualSkillResources() to expose
+ * each skill as its own top-level MCP resource so they appear as peers
+ * in the client UI rather than grouped under a single template node.
  */
 export function registerSkillResources(
   server: McpServer,
   skillState: SkillState
 ): void {
   registerSkillIndexResource(server, skillState);
-  registerSkillTemplate(server, skillState);
+  registerSkillReadTemplate(server, skillState);
+}
+
+/**
+ * Register every skill in skillState.skillMap as its own static MCP resource.
+ *
+ * Each skill gets a unique top-level entry in the client UI (e.g. the
+ * resources panel in Claude Desktop) instead of being grouped under a single
+ * template node. Call this once after the initial skillMap is populated, and
+ * again whenever new skills are discovered at runtime.
+ *
+ * Only registers skills that have not already been registered (tracked by
+ * the returned Set). Returns the set of registered skill names so callers
+ * can avoid double-registration on incremental refreshes.
+ */
+export function registerIndividualSkillResources(
+  server: McpServer,
+  skillState: SkillState,
+  alreadyRegistered: Set<string> = new Set()
+): Set<string> {
+  for (const skill of skillState.skillMap.values()) {
+    if (alreadyRegistered.has(skill.name)) continue;
+
+    const { annotations, size } = getResourceAnnotations(skill, 0.8);
+    const uri = buildSkillResourceUri(skill, "SKILL.md");
+
+    const resourceMeta: {
+      mimeType: string;
+      description: string;
+      annotations: typeof annotations;
+      size?: number;
+    } = {
+      mimeType: "text/markdown",
+      description: skill.description,
+      annotations,
+    };
+    if (size !== undefined) {
+      resourceMeta.size = size;
+    }
+
+    server.registerResource(
+      skill.baseName,
+      uri,
+      resourceMeta,
+      async (resourceUri) => {
+        const uriStr = resourceUri.toString();
+        // Re-resolve from the live skillMap so reads always reflect the
+        // current on-disk state even after a skillMap refresh.
+        const parsed = parseSkillResourceUri(uriStr, skillState.skillMap);
+        if (!parsed) {
+          throw new Error(`Skill resource not found for URI: ${uriStr}`);
+        }
+        try {
+          const content = loadSkillContent(parsed.skill.path);
+          return {
+            contents: [{ uri: uriStr, mimeType: "text/markdown", text: content }],
+          };
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          throw new Error(`Failed to load skill "${parsed.skill.baseName}": ${message}`);
+        }
+      }
+    );
+
+    alreadyRegistered.add(skill.name);
+  }
+  return alreadyRegistered;
 }
 
 /**
@@ -90,63 +163,26 @@ function registerSkillIndexResource(
 }
 
 /**
- * Register a single template that covers every skill:// URI other than
- * the exact index resource. The list callback enumerates only SKILL.md
- * resources (one per skill); the read handler dispatches between SKILL.md
- * and supporting-file reads.
+ * Register a read-only URI template that dispatches skill:// reads.
+ *
+ * The template has NO list callback — enumeration is handled by
+ * registerIndividualSkillResources() which gives each skill its own
+ * top-level resource entry. The template here exists solely so that
+ * URI reads for supporting files (skill://<path>/<file>) and SKILL.md
+ * are routed correctly, and so the complete handler can suggest URIs.
  */
-function registerSkillTemplate(
+function registerSkillReadTemplate(
   server: McpServer,
   skillState: SkillState
 ): void {
   server.registerResource(
     "Skill",
     new ResourceTemplate("skill://{+skillUri}", {
-      list: async () => {
-        const resources: Resource[] = [];
-        for (const skill of skillState.skillMap.values()) {
-          const { annotations, size } = getResourceAnnotations(skill, 0.8);
-          const resource: Resource = {
-            uri: buildSkillResourceUri(skill, "SKILL.md"),
-            name: skill.baseName,
-            mimeType: "text/markdown",
-            description: skill.description,
-            annotations,
-          };
-          if (size !== undefined) {
-            resource.size = size;
-          }
-          resources.push(resource);
-
-          // List each supporting file as its own resource, below SKILL.md.
-          // Reuses the same enumeration as the skill-resource tool so listing
-          // and tool behavior stay consistent (symlinks/SKILL.md/node_modules/
-          // hidden dirs already filtered; recurses to MAX_DIRECTORY_DEPTH).
-          const skillDir = path.dirname(skill.path);
-          // audience/priority are skill-level; lastModified/size must come from
-          // each file's own stat (not SKILL.md's), so build fresh per-file
-          // annotations rather than sharing one object.
-          const { audience, priority } = getResourceAnnotations(skill, 0.3).annotations;
-          for (const file of listSkillFiles(skillDir)) {
-            const fileResource: Resource = {
-              uri: buildSkillResourceUri(skill, file),
-              name: `${skill.baseName}/${file}`,
-              mimeType: getMimeType(file),
-              description: `Supporting file in ${skill.baseName}`,
-              annotations: { audience, priority },
-            };
-            try {
-              const stat = fs.statSync(path.resolve(skillDir, file));
-              fileResource.size = stat.size;
-              fileResource.annotations!.lastModified = stat.mtime.toISOString();
-            } catch {
-              // Best-effort size/lastModified; omit if the file can't be stat'd.
-            }
-            resources.push(fileResource);
-          }
-        }
-        return { resources };
-      },
+      // list is intentionally omitted (set to undefined) — individual skills
+      // are registered as static top-level resources by registerIndividualSkillResources().
+      // Providing a list callback here would group all skills under a single
+      // template node in the client UI, which is the bug we are fixing.
+      list: undefined,
       complete: {
         skillUri: (value: string) => {
           // Suggest <skill-path>/SKILL.md plus each supporting file, filtered

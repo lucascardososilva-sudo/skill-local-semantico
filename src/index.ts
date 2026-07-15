@@ -29,7 +29,7 @@ import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverSkills, createSkillMap, applyInvocationOverrides, SkillSource, DEFAULT_SKILL_SOURCE, BUNDLED_SKILL_SOURCE, warnLargeSkillCount } from "./skill-discovery.js";
 import { registerSkillTool, getToolDescription, getServerInstructions, SkillState, CatalogMode } from "./skill-tool.js";
-import { registerSkillResources } from "./skill-resources.js";
+import { registerSkillResources, registerIndividualSkillResources } from "./skill-resources.js";
 import { registerSkillPrompts, refreshPrompts, PromptRegistry } from "./skill-prompts.js";
 import { startHttpServer } from "./http-transport.js";
 import {
@@ -460,9 +460,14 @@ function refreshSkills(
   server: McpServer,
   skillTool: RegisteredTool,
   promptRegistry: PromptRegistry,
-  subscriptionManager: SubscriptionManager
+  subscriptionManager: SubscriptionManager,
+  registeredResources: Set<string>
 ): void {
   refreshSkillState(skillsDirs);
+
+  // Register any newly-discovered skills as individual top-level resources.
+  // alreadyRegistered ensures existing entries are not double-registered.
+  registerIndividualSkillResources(server, skillState, registeredResources);
 
   // Update the skill tool description with new instructions. In
   // catalog=instructions mode this is usage-only (no skill list) — the catalog
@@ -872,6 +877,11 @@ async function main() {
   // Register tools, resources, and prompts
   const skillTool = registerSkillTool(server, skillState, catalogMode);
   registerSkillResources(server, skillState);
+  // Register each skill as its own top-level MCP resource so they appear
+  // as peers in the client UI (not grouped under a single template node).
+  // The Set tracks which skills are already registered so incremental
+  // refreshes (file watcher, remote polling) can safely add new ones.
+  const registeredSkillResources = registerIndividualSkillResources(server, skillState);
   const promptRegistry = registerSkillPrompts(server, skillState);
 
   // Register subscription handlers for resource file watching
@@ -974,7 +984,7 @@ async function main() {
       );
 
       console.error(`Config changed via UI. Directories: ${currentSkillsDirs.join(", ") || "(none)"}`);
-      refreshSkills(currentSkillsDirs, server, skillTool, promptRegistry, subscriptionManager);
+      refreshSkills(currentSkillsDirs, server, skillTool, promptRegistry, subscriptionManager, registeredSkillResources);
     });
 
     // Register skill-display tool for UI-based invocation settings
@@ -982,7 +992,7 @@ async function main() {
       // Callback when invocation settings change via UI
       // Refresh skills to apply new overrides
       console.error("Invocation settings changed via UI. Refreshing skills...");
-      refreshSkills(currentSkillsDirs, server, skillTool, promptRegistry, subscriptionManager);
+      refreshSkills(currentSkillsDirs, server, skillTool, promptRegistry, subscriptionManager, registeredSkillResources);
     });
   }
 
@@ -990,7 +1000,7 @@ async function main() {
   // On stdio a refresh also updates the tool/prompts and pushes notifications.
   if (!isStatic) {
     const refreshAll = () =>
-      refreshSkills(currentSkillsDirs, server, skillTool, promptRegistry, subscriptionManager);
+      refreshSkills(currentSkillsDirs, server, skillTool, promptRegistry, subscriptionManager, registeredSkillResources);
     if (currentSkillsDirs.length > 0) {
       watchSkillDirectories(currentSkillsDirs, refreshAll);
     }

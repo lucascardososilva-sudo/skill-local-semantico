@@ -208,67 +208,97 @@ export function buildSkillIndex(skillMap: Map<string, SkillMetadata>): {
  * @param skillsDir - The directory to scan for skills
  * @param source - Optional source info to attach to discovered skills
  */
-export function discoverSkills(skillsDir: string, source?: SkillSource): SkillMetadata[] {
+function parseSkillFile(filePath: string, source: SkillSource): SkillMetadata | null {
+  try {
+    const content = fs.readFileSync(filePath, "utf-8");
+    const { metadata } = parseFrontmatter(content);
+
+    const name = metadata.name;
+    const description = metadata.description;
+    const disableModelInvocation = metadata["disable-model-invocation"];
+    const userInvocable = metadata["user-invocable"];
+
+    if (typeof name !== "string" || !name.trim()) {
+      return null;
+    }
+    if (typeof description !== "string" || !description.trim()) {
+      return null;
+    }
+
+    const effectiveAssistant = disableModelInvocation !== true;
+    const effectiveUser = userInvocable !== false;
+    const baseName = (name as string).trim();
+    const qualifiedName = qualifyName(source.prefix, baseName);
+
+    return {
+      name: qualifiedName,
+      baseName,
+      description: description.trim(),
+      path: filePath,
+      disableModelInvocation: disableModelInvocation === true,
+      userInvocable: userInvocable !== false,
+      effectiveAssistantInvocable: effectiveAssistant,
+      effectiveUserInvocable: effectiveUser,
+      isAssistantOverridden: false,
+      isUserOverridden: false,
+      source,
+    };
+  } catch (error) {
+    return null;
+  }
+}
+
+function discoverSkillsRecursive(
+  dir: string,
+  source: SkillSource,
+  depth: number = 0
+): SkillMetadata[] {
+  if (depth > 5) return [];
   const skills: SkillMetadata[] = [];
 
-  if (!fs.existsSync(skillsDir)) {
-    console.error(`Skills directory not found: ${skillsDir}`);
+  if (!fs.existsSync(dir)) return [];
+
+  // Check if this directory contains a SKILL.md/skill.md
+  const skillMdPath = findSkillMd(dir);
+  if (skillMdPath) {
+    // Treat as directory-based skill and stop recursion here
+    const skill = parseSkillFile(skillMdPath, source);
+    if (skill) {
+      skills.push(skill);
+    }
     return skills;
   }
 
-  const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
-
+  // If not a directory-based skill, scan files and subdirectories
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
+    if (entry.isSymbolicLink()) continue;
+    const fullPath = path.join(dir, entry.name);
 
-    const skillDir = path.join(skillsDir, entry.name);
-    const skillMdPath = findSkillMd(skillDir);
-
-    if (!skillMdPath) continue;
-
-    try {
-      const content = fs.readFileSync(skillMdPath, "utf-8");
-      const { metadata } = parseFrontmatter(content);
-
-      const name = metadata.name;
-      const description = metadata.description;
-      const disableModelInvocation = metadata["disable-model-invocation"];
-      const userInvocable = metadata["user-invocable"];
-      if (typeof name !== "string" || !name.trim()) {
-        console.error(`Skill at ${skillDir}: missing or invalid 'name' field`);
-        continue;
+    if (entry.isDirectory()) {
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+      skills.push(...discoverSkillsRecursive(fullPath, source, depth + 1));
+    } else if (entry.isFile()) {
+      // Don't treat SKILL.md or hidden files as file-based skills
+      if (
+        entry.name.toLowerCase().endsWith(".md") &&
+        entry.name.toLowerCase() !== "skill.md" &&
+        !entry.name.startsWith(".")
+      ) {
+        const skill = parseSkillFile(fullPath, source);
+        if (skill) {
+          skills.push(skill);
+        }
       }
-      if (typeof description !== "string" || !description.trim()) {
-        console.error(`Skill at ${skillDir}: missing or invalid 'description' field`);
-        continue;
-      }
-
-      const effectiveAssistant = disableModelInvocation !== true;
-      const effectiveUser = userInvocable !== false;
-      const baseName = (name as string).trim();
-      const skillSource = source || DEFAULT_SKILL_SOURCE;
-      const qualifiedName = qualifyName(skillSource.prefix, baseName);
-      skills.push({
-        name: qualifiedName,
-        baseName,
-        description: description.trim(),
-        path: skillMdPath,
-        disableModelInvocation: disableModelInvocation === true,
-        userInvocable: userInvocable !== false, // Default to true
-        // Initialize effective values from frontmatter (overrides applied later)
-        effectiveAssistantInvocable: effectiveAssistant,
-        effectiveUserInvocable: effectiveUser,
-        isAssistantOverridden: false,
-        isUserOverridden: false,
-        // Source info (local or GitHub)
-        source: skillSource,
-      });
-    } catch (error) {
-      console.error(`Failed to parse skill at ${skillDir}:`, error);
     }
   }
 
   return skills;
+}
+
+export function discoverSkills(skillsDir: string, source?: SkillSource): SkillMetadata[] {
+  const skillSource = source || DEFAULT_SKILL_SOURCE;
+  return discoverSkillsRecursive(skillsDir, skillSource);
 }
 
 /**
@@ -298,9 +328,11 @@ When a user's task matches a skill description below: 1) activate it, 2) follow 
     return preamble + "<available_skills>\n</available_skills>";
   }
 
+  const limit = 20;
+  const showSkills = skills.slice(0, limit);
   const lines: string[] = ["<available_skills>"];
 
-  for (const skill of skills) {
+  for (const skill of showSkills) {
     lines.push("<skill>");
     lines.push(`<name>${escapeXml(skill.name)}</name>`);
     lines.push(`<description>${escapeXml(skill.description)}</description>`);
@@ -310,7 +342,12 @@ When a user's task matches a skill description below: 1) activate it, 2) follow 
 
   lines.push("</available_skills>");
 
-  return preamble + lines.join("\n");
+  let results = preamble + lines.join("\n");
+  if (skills.length > limit) {
+    results += `\n\nNOTE: There are ${skills.length} skills available (showing first ${limit}). ` +
+      `If none of the above are relevant, use the 'search-skills' tool to search all available skills by keyword.`;
+  }
+  return results;
 }
 
 /**
@@ -439,4 +476,41 @@ export function warnLargeSkillCount(skillCount: number): void {
       `setting 'disable-model-invocation: true' in SKILL.md frontmatter for user-only skills.`
     );
   }
+}
+
+export function findMatchingSkills(
+  query: string,
+  skillMap: Map<string, SkillMetadata>,
+  limit: number = 10
+): SkillMetadata[] {
+  const q = query.toLowerCase();
+  const matches: { skill: SkillMetadata; score: number }[] = [];
+
+  for (const skill of skillMap.values()) {
+    let score = 0;
+    if (skill.name.toLowerCase() === q || skill.baseName.toLowerCase() === q) {
+      score += 100;
+    } else if (skill.name.toLowerCase().includes(q) || skill.baseName.toLowerCase().includes(q)) {
+      score += 50;
+    }
+
+    // Check description
+    const words = q.split(/\s+/).filter((w) => w.length > 1);
+    let descMatches = 0;
+    for (const word of words) {
+      if (skill.description.toLowerCase().includes(word)) {
+        descMatches++;
+      }
+    }
+    if (words.length > 0) {
+      score += (descMatches / words.length) * 30;
+    }
+
+    if (score > 0) {
+      matches.push({ skill, score });
+    }
+  }
+
+  matches.sort((a, b) => b.score - a.score);
+  return matches.slice(0, limit).map((m) => m.skill);
 }
