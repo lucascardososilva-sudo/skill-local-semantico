@@ -1,27 +1,35 @@
-:root {
-  --bg: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-tertiary: #0f1729;
-  --text: #e8e8e8;
-  --text-secondary: #a0a0a0;
-  --accent: #6366f1;
-  --accent-hover: #818cf8;
-  --border: #2a2a4a;
-  --success: #22c55e;
-  --warning: #eab308;
-  --error: #ef4444;
-  --info: #3b82f6;
-}
+/* ============================================================
+   Sanfran.md — Café Design System (MCP App)
+   Warm, cozy, intentional — mesma identidade do marketplace
+   ============================================================ */
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg: #ffffff;
-    --bg-secondary: #f5f5f5;
-    --bg-tertiary: #e8e8e8;
-    --text: #1a1a1a;
-    --text-secondary: #666666;
-    --border: #e0e0e0;
-  }
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Paleta Café */
+  --bg:           #F9F7F5;
+  --bg-secondary: #F5F1EC;
+  --bg-tertiary:  #EFE9E2;
+  --text:         #3E2B1E;
+  --text-secondary: #8B7D6B;
+  --accent:       #5D4432;
+  --accent-hover: #4D3728;
+  --accent-gold:  #C9A84C;
+  --border:       #E0D8D0;
+  --success:      #16A34A;
+  --warning:      #D97706;
+  --error:        #DC2626;
+  --info:         #5D4432;
+  --tag-bg:       #E9E3DD;
+
+  /* Tipografia */
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Bordas */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 }
 
 * {
@@ -31,44 +39,100 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans);
   background: var(--bg);
   color: var(--text);
   padding: 16px;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Cabeçalho / Branding ── */
+.sanfran-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.sanfran-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.sanfran-logo-mark {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #F9F7F5;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+}
+
+.sanfran-logo-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: -0.2px;
+}
+
+.sanfran-logo-dot {
+  color: var(--accent-gold);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 16px;
-  padding-bottom: 12px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--border);
 }
 
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 h1 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.3px;
 }
 
 .stats {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
+/* ── Botão Principal (Adicionar) ── */
 .add-btn {
-  padding: 8px 16px;
+  padding: 7px 14px;
   background: var(--accent);
-  color: white;
+  color: #F9F7F5;
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-family: var(--font-sans);
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  transition: background 0.15s;
 }
 
 .add-btn:hover {
@@ -80,38 +144,40 @@ h1 {
   cursor: not-allowed;
 }
 
-/* Hint banner */
+/* ── Banners de Dica e Aviso ── */
 .hint-banner {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   margin-bottom: 16px;
   font-size: 12px;
   color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 .hint-banner strong {
-  color: var(--text);
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .hint-banner code {
   background: var(--bg-tertiary);
-  padding: 1px 4px;
-  border-radius: 3px;
-  font-family: 'Fira Code', 'Consolas', monospace;
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--accent);
 }
 
-/* Override warning banner */
 .override-banner {
-  background: var(--warning);
-  color: #000;
+  background: color-mix(in srgb, var(--warning) 12%, var(--bg));
+  border: 1px solid var(--warning);
+  color: var(--warning);
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   margin-bottom: 16px;
-  font-size: 13px;
+  font-size: 12px;
   display: none;
 }
 
@@ -123,12 +189,11 @@ h1 {
   font-weight: 600;
 }
 
-/* Warning banner */
 .warning-banner {
-  background: color-mix(in srgb, var(--warning) 15%, var(--bg-secondary));
-  border: 1px solid var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--warning) 50%, var(--border));
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   margin-bottom: 16px;
   font-size: 12px;
   color: var(--warning);
@@ -138,7 +203,7 @@ h1 {
   color: var(--warning);
 }
 
-/* Directory list */
+/* ── Lista de Diretórios / Fontes de Skills ── */
 .directory-list {
   display: flex;
   flex-direction: column;
@@ -148,14 +213,24 @@ h1 {
 .directory-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 12px 14px;
   display: flex;
   align-items: center;
   gap: 12px;
+  transition: border-color 0.15s;
+}
+
+.directory-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
 
 .directory-card.readonly {
+  opacity: 0.75;
+}
+
+.directory-card.blocked {
+  border-color: color-mix(in srgb, var(--error) 50%, var(--border));
   opacity: 0.8;
 }
 
@@ -170,72 +245,77 @@ h1 {
 }
 
 .directory-path {
-  font-family: 'Fira Code', 'Consolas', monospace;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text);
   word-break: break-all;
 }
 
 .directory-meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 5px;
+  flex-wrap: wrap;
 }
 
+/* ── Badges ── */
 .source-badge {
   font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .source-badge.cli {
-  background: var(--info);
-  color: white;
+  background: var(--tag-bg);
+  color: var(--accent);
+  border: 1px solid var(--border);
 }
 
 .source-badge.env {
-  background: #9333ea;
-  color: white;
+  background: color-mix(in srgb, var(--accent-gold) 20%, var(--bg));
+  color: color-mix(in srgb, var(--accent-gold) 80%, var(--text));
+  border: 1px solid color-mix(in srgb, var(--accent-gold) 35%, var(--border));
 }
 
 .source-badge.config {
-  background: var(--success);
-  color: white;
+  background: color-mix(in srgb, var(--success) 12%, var(--bg));
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, var(--border));
 }
 
 .type-badge {
   font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   font-weight: 600;
+  letter-spacing: 0.3px;
 }
 
 .type-badge.local {
-  background: #6b7280;
-  color: white;
+  background: var(--tag-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
 }
 
 .type-badge.github {
-  background: #1f2937;
-  color: white;
+  background: var(--text);
+  color: var(--bg);
 }
 
 .blocked-badge {
   font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
   font-weight: 600;
-  background: var(--error);
-  color: white;
-}
-
-.directory-card.blocked {
-  border-color: var(--error);
-  opacity: 0.8;
+  background: color-mix(in srgb, var(--error) 12%, var(--bg));
+  color: var(--error);
+  border: 1px solid color-mix(in srgb, var(--error) 30%, var(--border));
 }
 
 .skill-count {
@@ -244,7 +324,7 @@ h1 {
 }
 
 .validity-icon {
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .validity-icon.valid {
@@ -255,44 +335,48 @@ h1 {
   color: var(--error);
 }
 
+/* ── Botão Remover ── */
 .remove-btn {
-  padding: 6px 12px;
+  padding: 5px 11px;
   background: transparent;
   color: var(--error);
-  border: 1px solid var(--error);
-  border-radius: 4px;
-  font-size: 12px;
+  border: 1px solid color-mix(in srgb, var(--error) 40%, var(--border));
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-family: var(--font-sans);
   cursor: pointer;
+  transition: all 0.15s;
 }
 
 .remove-btn:hover {
-  background: var(--error);
-  color: white;
+  background: color-mix(in srgb, var(--error) 10%, var(--bg));
+  border-color: var(--error);
 }
 
-/* Section header for sub-sections */
+/* ── Cabeçalho de Seção ── */
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 24px;
   margin-bottom: 12px;
-  padding-top: 16px;
+  padding-top: 18px;
   border-top: 1px solid var(--border);
 }
 
 .section-header h2 {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
+  color: var(--text);
 }
 
 .section-hint {
   font-size: 11px;
   color: var(--text-secondary);
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
-/* Allowed orgs/users list */
+/* ── Lista de Orgs / Origens Permitidas ── */
 .allowed-list {
   display: flex;
   flex-wrap: wrap;
@@ -305,13 +389,14 @@ h1 {
   gap: 8px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  padding: 5px 10px;
 }
 
 .allowed-name {
-  font-size: 13px;
-  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--text);
 }
 
 .remove-org-btn,
@@ -320,42 +405,45 @@ h1 {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-size: 11px;
+  font-family: var(--font-sans);
   cursor: pointer;
+  transition: all 0.15s;
 }
 
 .remove-org-btn:hover,
 .remove-origin-btn:hover {
-  background: var(--error);
+  background: color-mix(in srgb, var(--error) 10%, var(--bg));
   border-color: var(--error);
-  color: white;
+  color: var(--error);
 }
 
-/* Empty state */
+/* ── Estados Vazios e Carregando ── */
 .empty-state {
   text-align: center;
-  padding: 40px 20px;
+  padding: 32px 20px;
   color: var(--text-secondary);
+  font-size: 13px;
 }
 
 .empty-state.small {
-  padding: 16px;
+  padding: 14px;
   font-size: 12px;
 }
 
 .empty-state p {
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
-/* Loading state */
 .loading {
   text-align: center;
-  padding: 40px;
+  padding: 32px;
   color: var(--text-secondary);
+  font-size: 13px;
 }
 
-/* Modal */
+/* ── Modal ── */
 .modal-overlay {
   display: none;
   position: fixed;
@@ -363,7 +451,7 @@ h1 {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(62, 43, 30, 0.4);
   z-index: 100;
   justify-content: center;
   align-items: center;
@@ -374,13 +462,14 @@ h1 {
 }
 
 .modal {
-  background: var(--bg-secondary);
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   width: 90%;
-  max-width: 500px;
+  max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(62, 43, 30, 0.12);
 }
 
 .modal-header {
@@ -392,17 +481,23 @@ h1 {
 }
 
 .modal-header h2 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
+  color: var(--text);
 }
 
 .modal-close {
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 20px;
   color: var(--text-secondary);
   cursor: pointer;
   line-height: 1;
+  transition: color 0.15s;
+}
+
+.modal-close:hover {
+  color: var(--text);
 }
 
 .modal-body {
@@ -415,20 +510,22 @@ h1 {
 
 .form-group label {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 500;
   margin-bottom: 6px;
   color: var(--text);
 }
 
 .form-group input {
   width: 100%;
-  padding: 10px 12px;
-  background: var(--bg);
+  padding: 9px 12px;
+  background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   color: var(--text);
   font-size: 13px;
-  font-family: 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font-mono);
+  transition: border-color 0.15s;
 }
 
 .form-group input:focus {
@@ -436,19 +533,24 @@ h1 {
   border-color: var(--accent);
 }
 
+.form-group input::placeholder {
+  color: var(--text-secondary);
+}
+
 .form-hint {
   font-size: 11px;
   color: var(--text-secondary);
-  margin-top: 4px;
+  margin-top: 5px;
   line-height: 1.5;
 }
 
 .form-hint code {
   background: var(--bg-tertiary);
   padding: 1px 4px;
-  border-radius: 3px;
-  font-family: 'Fira Code', 'Consolas', monospace;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
   font-size: 10px;
+  color: var(--accent);
 }
 
 .modal-footer {
@@ -459,17 +561,21 @@ h1 {
   border-top: 1px solid var(--border);
 }
 
+/* ── Botões ── */
 .btn {
-  padding: 10px 18px;
-  border-radius: 6px;
+  padding: 9px 18px;
+  border-radius: var(--radius-md);
   font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 500;
   cursor: pointer;
   border: none;
+  transition: all 0.15s;
 }
 
 .btn-primary {
   background: var(--accent);
-  color: white;
+  color: var(--bg);
 }
 
 .btn-primary:hover {
@@ -482,91 +588,93 @@ h1 {
 }
 
 .btn-secondary {
-  background: var(--bg);
+  background: var(--bg-secondary);
   color: var(--text);
   border: 1px solid var(--border);
 }
 
 .btn-secondary:hover {
-  background: var(--border);
+  background: var(--bg-tertiary);
 }
 
 .btn-danger {
-  background: var(--error);
-  color: white;
+  background: color-mix(in srgb, var(--error) 12%, var(--bg));
+  color: var(--error);
+  border: 1px solid color-mix(in srgb, var(--error) 40%, var(--border));
 }
 
 .btn-danger:hover {
-  background: #dc2626;
+  background: var(--error);
+  color: white;
+  border-color: var(--error);
 }
 
 .modal-small {
-  max-width: 400px;
+  max-width: 380px;
 }
 
 .confirm-path {
-  font-family: 'Fira Code', 'Consolas', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
-  background: var(--bg);
+  background: var(--bg-secondary);
   padding: 8px 12px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   word-break: break-all;
   margin-top: 8px;
+  color: var(--text-secondary);
 }
 
-/* Toast */
+/* ── Toast ── */
 .toast {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  padding: 12px 18px;
-  background: var(--bg-secondary);
+  padding: 11px 16px;
+  background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 13px;
+  font-family: var(--font-sans);
   z-index: 200;
   display: none;
   max-width: 300px;
+  box-shadow: 0 4px 16px rgba(62, 43, 30, 0.1);
 }
 
 .toast.success {
-  border-color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 50%, var(--border));
   color: var(--success);
 }
 
 .toast.error {
-  border-color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 50%, var(--border));
   color: var(--error);
 }
 
 .toast.visible {
   display: block;
-  animation: slideIn 0.3s ease;
+  animation: toastSlideIn 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
 }
 
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+@keyframes toastSlideIn {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
 }
 
-/* Settings section */
+/* ── Seção de Configurações ── */
 .settings-section {
   margin-top: 24px;
-  padding-top: 16px;
+  padding-top: 18px;
   border-top: 1px solid var(--border);
 }
 
 .settings-section h2 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   margin-bottom: 12px;
   color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .setting-item {
@@ -577,7 +685,7 @@ h1 {
   padding: 12px 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
 }
 
 .setting-info {
@@ -588,7 +696,8 @@ h1 {
   font-size: 13px;
   font-weight: 500;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  color: var(--text);
 }
 
 .setting-hint {
@@ -597,7 +706,7 @@ h1 {
   line-height: 1.4;
 }
 
-/* Toggle switch */
+/* ── Toggle Switch ── */
 .toggle-switch {
   position: relative;
   display: inline-block;
@@ -631,9 +740,10 @@ h1 {
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: var(--text);
+  background-color: var(--bg);
   transition: 0.2s;
   border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
 }
 
 .toggle-switch input:checked + .toggle-slider {
@@ -642,10 +752,21 @@ h1 {
 
 .toggle-switch input:checked + .toggle-slider:before {
   transform: translateX(20px);
-  background-color: white;
+  background-color: var(--bg);
 }
 
 .toggle-switch input:disabled + .toggle-slider {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ── Scrollbars ── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }

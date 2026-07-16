@@ -164,6 +164,18 @@ export function registerSkillTool(
         };
       }
 
+      if (!skill.effectiveAssistantInvocable) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Skill "${name}" is currently disabled by admin. Contact your team administrator to re-enable it.`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
       try {
         const content = loadSkillContent(skill.path);
         return {
@@ -323,6 +335,18 @@ function registerSkillResourceTool(
             {
               type: "text",
               text: `Skill "${skillName}" not found. Available skills: ${availableSkills || "none"}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      if (!skill.effectiveAssistantInvocable) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Skill "${skillName}" is currently disabled by admin. Contact your team administrator to re-enable it.`,
             },
           ],
           isError: true,

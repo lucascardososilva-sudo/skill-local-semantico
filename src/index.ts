@@ -857,7 +857,7 @@ async function main() {
 
   const server = new McpServer(
     {
-      name: "skilljack-mcp",
+      name: "sanfran.md",
       version: "1.0.0",
     },
     {
@@ -1010,12 +1010,12 @@ async function main() {
   // Connect via stdio transport
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Skilljack ready. I know kung fu.");
+  console.error("Sanfran.md ready. I know kung fu.");
 }
 
 // Only run main() when executed directly (not when imported by tests)
 const isMainModule = process.argv[1] &&
-  (process.argv[1].endsWith("skilljack-mcp") ||
+  (process.argv[1].endsWith("sanfran-mcp") ||
    process.argv[1] === fileURLToPath(import.meta.url));
 
 if (isMainModule) {

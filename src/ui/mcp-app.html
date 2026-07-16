@@ -1,79 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light dark">
-  <title>Skills Configuration</title>
+  <title>Sanfran.md — Configuração</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./mcp-app.css">
 </head>
 <body>
   <div class="header">
-    <div>
-      <h1>Skills Directories</h1>
-      <div class="stats" id="stats">Loading...</div>
+    <div class="header-left">
+      <!-- Branding Sanfran.md -->
+      <div class="sanfran-logo">
+        <div class="sanfran-logo-mark">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scale">
+            <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+            <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/>
+            <path d="M7 21h10"/>
+            <path d="M12 3v18"/>
+            <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>
+          </svg>
+        </div>
+        <span class="sanfran-logo-text">Sanfran<span class="sanfran-logo-dot">.md</span></span>
+      </div>
+      <h1>Fontes de Skills Jurídicas</h1>
+      <div class="stats" id="stats">Carregando...</div>
     </div>
     <button class="add-btn" id="add-btn">
-      <span>+</span> Add Directory
+      <span>+</span> Adicionar Fonte
     </button>
   </div>
 
   <div class="hint-banner">
-    <strong>Tip:</strong> Ask Claude to "show my skills" to view your skills list and manage invocation settings.
+    <strong>Dica:</strong> Peça ao agente para <em>"mostrar minhas skills"</em> para visualizar o catálogo jurídico completo e gerenciar as configurações de invocação.
   </div>
 
   <div class="override-banner" id="override-banner">
-    <strong>Note:</strong> Directories are being set by <span id="override-source">CLI args</span>.
-    Changes to the config file won't take effect while this override is active.
+    <strong>Atenção:</strong> Os diretórios estão sendo definidos por <span id="override-source">argumentos CLI</span>.
+    Alterações no arquivo de configuração não terão efeito enquanto este override estiver ativo.
   </div>
 
   <div class="warning-banner" id="skill-count-warning" style="display: none;">
-    <strong>Warning:</strong> Large number of skills detected. This may degrade LLM performance by bloating tool descriptions. Consider removing skill directories.
+    <strong>Aviso:</strong> Grande volume de skills detectado. Isso pode reduzir a performance do agente ao saturar as descrições de ferramentas. Considere remover fontes não utilizadas.
   </div>
 
   <div id="directory-list" class="directory-list">
-    <div class="loading">Loading directories...</div>
+    <div class="loading">Carregando fontes de skills...</div>
   </div>
 
-  <!-- GitHub Allowed Orgs Section -->
+  <!-- Repositórios Seguros (GitHub) -->
   <div class="section-header">
     <div>
-      <h2>GitHub Allowed Orgs</h2>
-      <div class="section-hint">Organizations allowed to sync skills from GitHub</div>
+      <h2>Repositórios Seguros (GitHub)</h2>
+      <div class="section-hint">Organizações autorizadas a sincronizar skills via GitHub</div>
     </div>
     <button class="add-btn add-org-btn" id="add-org-btn">
-      <span>+</span> Add Org
+      <span>+</span> Adicionar Org
     </button>
   </div>
 
   <div id="allowed-orgs-list" class="allowed-list">
-    <div class="empty-state small">No allowed orgs configured. GitHub repos are blocked until an org/user is added.</div>
+    <div class="empty-state small">Nenhuma organização autorizada. Repositórios GitHub estão bloqueados até que uma org ou usuário seja adicionado.</div>
   </div>
 
-  <!-- Well-Known Allowed Origins Section -->
+  <!-- Origens Confiáveis (URLs) -->
   <div class="section-header">
     <div>
-      <h2>Well-Known Allowed Origins</h2>
-      <div class="section-hint">HTTPS origins allowed to publish skills via <code>/.well-known/agent-skills/</code></div>
+      <h2>Origens Confiáveis (URLs)</h2>
+      <div class="section-hint">Servidores HTTPS autorizados a publicar skills via <code>/.well-known/agent-skills/</code></div>
     </div>
     <button class="add-btn add-origin-btn" id="add-origin-btn">
-      <span>+</span> Add Origin
+      <span>+</span> Adicionar Origem
     </button>
   </div>
 
   <div id="allowed-origins-list" class="allowed-list">
-    <div class="empty-state small">No allowed origins configured. Well-known publishers are blocked until an origin is added.</div>
+    <div class="empty-state small">Nenhuma origem confiável configurada. Publicadores externos estão bloqueados até que uma origem seja adicionada.</div>
   </div>
 
-  <!-- Settings Section -->
+  <!-- Configurações -->
   <div class="settings-section">
-    <h2>Settings</h2>
+    <h2>Configurações</h2>
     <div class="setting-item">
       <div class="setting-info">
-        <label for="static-mode-toggle">Static Mode</label>
+        <label for="static-mode-toggle">Modo Estático</label>
         <div class="setting-hint">
-          Freeze skills list at startup. Disables file watching and dynamic updates.
-          <br><strong>Requires server restart to take effect.</strong>
+          Congela a lista de skills no momento da inicialização. Desativa o monitoramento de arquivos e atualizações automáticas.
+          <br><strong>Requer reinicialização do servidor para ter efeito.</strong>
         </div>
       </div>
       <label class="toggle-switch">
@@ -83,145 +98,145 @@
     </div>
   </div>
 
-  <!-- Confirm Remove Org Modal -->
+  <!-- Modal: Confirmar Remoção de Org -->
   <div class="modal-overlay" id="confirm-remove-org-modal">
     <div class="modal modal-small">
       <div class="modal-header">
-        <h2>Remove Allowed Org</h2>
+        <h2>Remover Organização</h2>
         <button class="modal-close" id="confirm-remove-org-close">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Remove this organization from the allowed list?</p>
+        <p>Remover esta organização da lista de repositórios seguros?</p>
         <p class="confirm-path" id="confirm-remove-org-name"></p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" id="confirm-remove-org-cancel">Cancel</button>
-        <button class="btn btn-danger" id="confirm-remove-org-btn">Remove</button>
+        <button class="btn btn-secondary" id="confirm-remove-org-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="confirm-remove-org-btn">Remover</button>
       </div>
     </div>
   </div>
 
-  <!-- Confirm Remove Origin Modal -->
+  <!-- Modal: Confirmar Remoção de Origem -->
   <div class="modal-overlay" id="confirm-remove-origin-modal">
     <div class="modal modal-small">
       <div class="modal-header">
-        <h2>Remove Allowed Origin</h2>
+        <h2>Remover Origem</h2>
         <button class="modal-close" id="confirm-remove-origin-close">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Remove this origin from the allowed list?</p>
+        <p>Remover esta origem da lista de origens confiáveis?</p>
         <p class="confirm-path" id="confirm-remove-origin-name"></p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" id="confirm-remove-origin-cancel">Cancel</button>
-        <button class="btn btn-danger" id="confirm-remove-origin-btn">Remove</button>
+        <button class="btn btn-secondary" id="confirm-remove-origin-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="confirm-remove-origin-btn">Remover</button>
       </div>
     </div>
   </div>
 
-  <!-- Add Origin Modal -->
+  <!-- Modal: Adicionar Origem Confiável -->
   <div class="modal-overlay" id="add-origin-modal">
     <div class="modal">
       <div class="modal-header">
-        <h2>Add Allowed Well-Known Origin</h2>
+        <h2>Adicionar Origem Confiável</h2>
         <button class="modal-close" data-modal="add-origin-modal">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="origin-name">Origin</label>
+          <label for="origin-name">URL de Origem</label>
           <input
             type="text"
             id="origin-name"
-            placeholder="https://example.com"
+            placeholder="https://exemplo.com"
           >
           <div class="form-hint">
-            HTTPS origin (scheme + host + optional port) of a well-known publisher.
-            <br>You can paste a full URL — only the origin is stored.
-            <br>Examples: <code>https://example.com</code>, <code>https://skills.acme.org:8443</code>
+            Origem HTTPS (esquema + host + porta opcional) de um publicador confiável.
+            <br>Você pode colar uma URL completa — somente a origem é armazenada.
+            <br>Exemplos: <code>https://sanfran.md</code>, <code>https://skills.escritorio.com.br:8443</code>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-modal="add-origin-modal">Cancel</button>
-        <button class="btn btn-primary" id="add-origin-submit-btn">Add Origin</button>
+        <button class="btn btn-secondary" data-modal="add-origin-modal">Cancelar</button>
+        <button class="btn btn-primary" id="add-origin-submit-btn">Adicionar Origem</button>
       </div>
     </div>
   </div>
 
-  <!-- Add Org Modal -->
+  <!-- Modal: Adicionar Repositório Seguro -->
   <div class="modal-overlay" id="add-org-modal">
     <div class="modal">
       <div class="modal-header">
-        <h2>Add Allowed GitHub Org</h2>
+        <h2>Adicionar Repositório GitHub</h2>
         <button class="modal-close" data-modal="add-org-modal">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="org-name">Organization Name</label>
+          <label for="org-name">Nome da Organização</label>
           <input
             type="text"
             id="org-name"
-            placeholder="e.g., modelcontextprotocol"
+            placeholder="ex: sanfran-legal"
           >
           <div class="form-hint">
-            GitHub organization or username to allow for skill repositories
+            Organização ou usuário do GitHub autorizado a publicar skills para este agente.
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-modal="add-org-modal">Cancel</button>
-        <button class="btn btn-primary" id="add-org-submit-btn">Add Org</button>
+        <button class="btn btn-secondary" data-modal="add-org-modal">Cancelar</button>
+        <button class="btn btn-primary" id="add-org-submit-btn">Adicionar Org</button>
       </div>
     </div>
   </div>
 
-  <!-- Confirm Remove Modal -->
+  <!-- Modal: Confirmar Remoção de Diretório -->
   <div class="modal-overlay" id="confirm-remove-modal">
     <div class="modal modal-small">
       <div class="modal-header">
-        <h2>Remove Directory</h2>
+        <h2>Remover Fonte de Skills</h2>
         <button class="modal-close" id="confirm-remove-close">&times;</button>
       </div>
       <div class="modal-body">
-        <p>Remove this directory from configuration?</p>
+        <p>Remover esta fonte de skills da configuração?</p>
         <p class="confirm-path" id="confirm-remove-path"></p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" id="confirm-remove-cancel">Cancel</button>
-        <button class="btn btn-danger" id="confirm-remove-btn">Remove</button>
+        <button class="btn btn-secondary" id="confirm-remove-cancel">Cancelar</button>
+        <button class="btn btn-danger" id="confirm-remove-btn">Remover</button>
       </div>
     </div>
   </div>
 
-  <!-- Add Directory Modal -->
+  <!-- Modal: Adicionar Nova Fonte de Skills -->
   <div class="modal-overlay" id="add-modal">
     <div class="modal">
       <div class="modal-header">
-        <h2>Add Skills Source</h2>
+        <h2>Adicionar Fonte de Skills</h2>
         <button class="modal-close">&times;</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="directory-path">Directory Path, GitHub URL, or Well-Known URL</label>
+          <label for="directory-path">Caminho, URL do GitHub ou URL Pública</label>
           <input
             type="text"
             id="directory-path"
-            placeholder="/path, github.com/org/repo, or https://example.com/.well-known/agent-skills/"
+            placeholder="/caminho/local, github.com/org/repo, ou https://exemplo.com/.well-known/agent-skills/"
           >
           <div class="form-hint">
-            Local path, GitHub repository, or HTTPS publisher serving <code>/.well-known/agent-skills/index.json</code>.
-            <br>Examples: <code>C:\skills</code>, <code>github.com/org/repo</code>, <code>github.com/org/repo/subdir</code>, <code>https://example.com/.well-known/agent-skills/</code>
+            Suporte a: caminho local no sistema de arquivos, repositório GitHub, ou publicador HTTPS com <code>/.well-known/agent-skills/index.json</code>.
+            <br>Exemplos: <code>C:\skills-juridicas</code>, <code>github.com/org/repo</code>, <code>https://sanfran.md/.well-known/agent-skills/</code>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary">Cancel</button>
-        <button class="btn btn-primary" id="add-submit-btn">Add Directory</button>
+        <button class="btn btn-secondary">Cancelar</button>
+        <button class="btn btn-primary" id="add-submit-btn">Adicionar Fonte</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast -->
+  <!-- Toast de notificação -->
   <div class="toast" id="toast"></div>
 
   <script type="module" src="./mcp-app.ts"></script>

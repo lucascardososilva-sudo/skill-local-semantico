@@ -58,7 +58,7 @@ function getUIPath(): string {
  */
 const UpdateInvocationInputSchema = {
   skillName: z.string().describe("Name of the skill to update"),
-  setting: z.enum(["assistant", "user"]).describe("Which setting to update"),
+  setting: z.enum(["assistant", "user", "all"]).describe("Which setting to update"),
   value: z.boolean().describe("New value for the setting"),
 };
 
@@ -229,7 +229,7 @@ export function registerSkillDisplayTool(
     async (args): Promise<CallToolResult> => {
       const { skillName, setting, value } = args as {
         skillName: string;
-        setting: "assistant" | "user";
+        setting: "assistant" | "user" | "all";
         value: boolean;
       };
 
@@ -240,7 +240,12 @@ export function registerSkillDisplayTool(
         }
 
         // Update the override
-        setSkillInvocationOverride(skillName, setting, value);
+        if (setting === "all") {
+          setSkillInvocationOverride(skillName, "assistant", value);
+          setSkillInvocationOverride(skillName, "user", value);
+        } else {
+          setSkillInvocationOverride(skillName, setting, value);
+        }
 
         // Trigger refresh to apply the new override
         onInvocationChanged();
@@ -369,6 +374,51 @@ export function registerSkillDisplayTool(
           isError: true,
         };
       }
+    }
+  );
+
+  // Agent toggle tool (visible to model, opens UI for HITL)
+  registerAppTool(
+    server,
+    "skill-toggle",
+    {
+      title: "Toggle Skill",
+      description: "Enable or disable a skill. Requires user confirmation in the UI.",
+      inputSchema: {
+        skillName: z.string().describe("Name of the skill to toggle"),
+        enabled: z.boolean().describe("Whether to enable (true) or disable (false) the skill")
+      },
+      outputSchema: {
+        type: z.string(),
+        skillName: z.string(),
+        enabled: z.boolean()
+      },
+      _meta: { ui: { resourceUri: RESOURCE_URI } },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+      },
+    },
+    async (args): Promise<CallToolResult> => {
+      const { skillName, enabled } = args as { skillName: string; enabled: boolean };
+      
+      if (!skillState.skillMap.has(skillName)) {
+        return {
+          content: [{ type: "text", text: `Skill not found: ${skillName}` }],
+          isError: true
+        };
+      }
+      
+      return {
+        content: [{ type: "text", text: "Awaiting user confirmation in the UI..." }],
+        structuredContent: {
+          type: "toggle_request",
+          skillName,
+          enabled
+        }
+      };
     }
   );
 
