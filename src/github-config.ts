@@ -36,7 +36,7 @@ const DEFAULT_POLL_INTERVAL_MS = 5 * 60 * 1000;
 /**
  * Default cache directory.
  */
-const DEFAULT_CACHE_DIR = path.join(os.homedir(), ".skilljack", "github-cache");
+const DEFAULT_CACHE_DIR = process.env.SKILLJACK_CACHE_DIR || path.join(process.cwd(), ".skilljack-cache");
 
 /**
  * Check if a path is a GitHub URL.

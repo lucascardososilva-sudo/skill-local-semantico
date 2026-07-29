@@ -77,6 +77,18 @@ export async function startHttpServer(
 ): Promise<http.Server> {
   const httpServer = http.createServer(async (req, res) => {
     const url = req.url ?? "";
+
+    // Health check endpoint for Railway / Docker / load balancers
+    if (req.method === "GET" && url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({
+        status: "ok",
+        skills: skillState.skillMap.size,
+        timestamp: new Date().toISOString()
+      }));
+      return;
+    }
+
     if (req.method !== "POST" || !(url === "/mcp" || url.startsWith("/mcp?"))) {
       res.writeHead(405, { "Content-Type": "application/json", Allow: "POST" });
       res.end(JSONRPC_ERROR(-32000, "Only POST /mcp is supported (stateless mode)"));
