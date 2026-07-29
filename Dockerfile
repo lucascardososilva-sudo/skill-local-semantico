@@ -32,9 +32,8 @@ RUN apk add --no-cache git
 COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts
 
-# Copiar dist e skills bundled
+# Copiar apenas o dist (skills bundled removidas — usaremos apenas o repositório GitHub)
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/skills ./skills
 
 # Criar diretório para cache do GitHub
 RUN mkdir -p /app/.skilljack-cache
