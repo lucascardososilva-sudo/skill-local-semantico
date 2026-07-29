@@ -118,7 +118,13 @@ export function parseGitHubUrl(url: string): GitHubRepoSpec {
  * @returns true if allowed, false if blocked
  */
 export function isRepoAllowed(spec: GitHubRepoSpec, config: GitHubConfig): boolean {
-  // If no allowlist configured, deny all for security
+  // MVP mode: if a token is provided, allow all repos (the token itself is the auth)
+  // This simplifies the initial setup — no need to configure allowlists
+  if (config.token) {
+    return true;
+  }
+
+  // If no token and no allowlist configured, deny all for security
   if (config.allowedOrgs.length === 0 && config.allowedUsers.length === 0) {
     return false;
   }
