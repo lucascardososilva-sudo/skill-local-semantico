@@ -249,9 +249,9 @@ export function warnIfLegacyCatalogMode(mode: CatalogMode): void {
   }
   console.error(
     "Warning: --catalog=tool-description is a legacy escape hatch and not recommended. " +
-      "Clients with tool search / deferred tool loading enabled (the modern Claude Code default) keep the load-skill description — and the skill catalog inside it — out of model context, so skills won't auto-activate unless the client sets ENABLE_TOOL_SEARCH=false. " +
-      "Each catalog refresh also invalidates the client's entire prompt cache, since tool definitions sit at the top of the cached prompt prefix. " +
-      "Prefer the default instructions mode. See https://github.com/olaservo/skilljack-mcp/issues/78"
+    "Clients with tool search / deferred tool loading enabled (the modern Claude Code default) keep the load-skill description — and the skill catalog inside it — out of model context, so skills won't auto-activate unless the client sets ENABLE_TOOL_SEARCH=false. " +
+    "Each catalog refresh also invalidates the client's entire prompt cache, since tool definitions sit at the top of the cached prompt prefix. " +
+    "Prefer the default instructions mode. See https://github.com/olaservo/skilljack-mcp/issues/78"
   );
 }
 
@@ -402,7 +402,7 @@ function discoverSkillsFromDirs(
       if (seenNames.has(skill.name)) {
         console.error(
           `Warning: Duplicate skill "${skill.name}" found in ${path.dirname(skill.path)} ` +
-            `(already loaded from ${seenNames.get(skill.name)})`
+          `(already loaded from ${seenNames.get(skill.name)})`
         );
         continue; // Skip duplicate
       }
@@ -668,6 +668,20 @@ function startRemoteSourcePolling(
 const subscriptionManager = createSubscriptionManager();
 
 async function main() {
+  // ---------------------------------------------------------------------
+  // DEBUG TEMPORÁRIO — remover depois de identificar a causa raiz do
+  // "Discovered 0 skill(s)". Mostra exatamente o que process.env está
+  // entregando para o processo, sem depender da UI do Railway.
+  // ---------------------------------------------------------------------
+  console.error(`DEBUG raw SKILLS_DIR: "${process.env.SKILLS_DIR}"`);
+  console.error(
+    `DEBUG all SKILL*/GITHUB* env keys: ${Object.keys(process.env)
+      .filter((k) => k.includes("SKILL") || k.includes("GITHUB"))
+      .map((k) => `${k}=${JSON.stringify(process.env[k])}`)
+      .join(" | ")}`
+  );
+  // ---------------------------------------------------------------------
+
   // Check if static mode is enabled
   const isStatic = getStaticMode();
 
@@ -695,7 +709,7 @@ async function main() {
       if (!isRepoAllowed(spec, githubConfig)) {
         console.error(
           `Blocked: ${spec.owner}/${spec.repo} not in allowed orgs/users. ` +
-            `Set GITHUB_ALLOWED_ORGS or GITHUB_ALLOWED_USERS to permit.`
+          `Set GITHUB_ALLOWED_ORGS or GITHUB_ALLOWED_USERS to permit.`
         );
         continue;
       }
@@ -736,7 +750,7 @@ async function main() {
       if (!isOriginAllowed(spec, wellKnownConfig)) {
         console.error(
           `Blocked: ${spec.origin} not in allowed origins. ` +
-            `Set WELL_KNOWN_ALLOWED_ORIGINS or wellKnownAllowedOrigins in config to permit.`
+          `Set WELL_KNOWN_ALLOWED_ORIGINS or wellKnownAllowedOrigins in config to permit.`
         );
         continue;
       }
@@ -1016,7 +1030,7 @@ async function main() {
 // Only run main() when executed directly (not when imported by tests)
 const isMainModule = process.argv[1] &&
   (process.argv[1].endsWith("sanfran-mcp") ||
-   process.argv[1] === fileURLToPath(import.meta.url));
+    process.argv[1] === fileURLToPath(import.meta.url));
 
 if (isMainModule) {
   main().catch((error) => {
