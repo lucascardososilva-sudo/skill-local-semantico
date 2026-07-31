@@ -21,6 +21,8 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { registerSkillTool, getServerInstructions, SkillState, CatalogMode } from "./skill-tool.js";
 import { registerSkillResources } from "./skill-resources.js";
 import { registerSkillPrompts } from "./skill-prompts.js";
+import { registerSkillConfigTool } from "./skill-config-tool.js";
+import { registerSkillDisplayTool } from "./skill-display-tool.js";
 
 /**
  * Build a fresh McpServer exposing the core skill surface for one request.
@@ -59,6 +61,19 @@ export function buildCoreServer(
   registerSkillTool(server, skillState, catalogMode);
   registerSkillResources(server, skillState);
   registerSkillPrompts(server, skillState);
+
+  // UI tools: expose the skill-config and skill-display (MCP Apps) surfaces.
+  // On stateless HTTP there is no persistent server to push notifications, so
+  // the callbacks below just log. Discovery-on-change is already handled by the
+  // file watchers / remote polling in main(), which swap skillState; every
+  // request reads that state fresh. (MCP Apps rendering itself is stdio-only,
+  // but these tools remain callable over HTTP and return structuredContent.)
+  registerSkillConfigTool(server, skillState, () => {
+    console.error("Config changed via HTTP. Refresh handled on next request.");
+  });
+  registerSkillDisplayTool(server, skillState, () => {
+    console.error("Invocation changed via HTTP. Refresh handled on next request.");
+  });
 
   return server;
 }
